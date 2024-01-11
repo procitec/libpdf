@@ -437,7 +437,7 @@ def update_ann_info(annotation_page_map, ann_resolved, page, idx_page, pdf):  # 
         page.height,
     )
     page_crop = page.within_bbox(ann_bbox)
-    ann_text = page_crop.extract_text(x_tolerance=1, y_tolerance=4)
+    ann_text = page_crop.extract_text(x_tolerance=float(1), y_tolerance=float(4))
 
     if "A" in ann_resolved:
         # make sure ann_resolved['A'] is resolved

@@ -957,9 +957,9 @@ def pdfminer_get_lt_textboxes(pdf) -> Dict[int, List[LTTextBox]]:
         if logging_needed(idx_page, len(pdf.pages)):
             LOG.debug("Extracting layout page %s of %s", idx_page + 1, len(pdf.pages))
 
-        pdf.interpreter.process_page(page.page_obj)
-        result = pdf.device.get_result()
-        lt_textboxes = [obj for obj in result if isinstance(obj, LTTextBox)]
+        # pdf.interpreter.process_page(page.page_obj)
+        layout_objects = page.layout._objs
+        lt_textboxes = [obj for obj in layout_objects if isinstance(obj, LTTextBox)]
         # remove detected header and footer lt_textboxes based on given page crop margin parameter
         filter_lt_textboxes = list(
             filter(
