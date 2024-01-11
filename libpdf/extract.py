@@ -42,6 +42,12 @@ from libpdf.utils import (
     to_pdfplumber_bbox,
 )
 
+from pdfminer.layout import LTText
+
+import pdfplumber
+
+import yaml
+
 LOG = logging.getLogger(__name__)
 
 
