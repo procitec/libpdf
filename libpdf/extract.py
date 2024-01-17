@@ -18,6 +18,7 @@ from libpdf.catalog import catalog, extract_catalog
 from libpdf.exceptions import LibpdfError
 from libpdf.log import logging_needed
 from libpdf.models.figure import Figure
+from libpdf.models.rect import Rect
 from libpdf.models.file import File
 from libpdf.models.file_meta import FileMeta
 from libpdf.models.page import Page
@@ -184,6 +185,7 @@ def extract(  # pylint: disable=too-many-locals, too-many-branches, too-many-sta
             pdf,
             figure_list,
             table_list,
+            rect_list if crop_rects_text else [],
             pages_list,
             no_chapters,
             no_paragraphs,
@@ -663,6 +665,85 @@ def extract_figures(
                 figure_list.append(figure)
 
     return figure_list
+
+def extract_rects(
+    pdf,
+    pages_list,
+    figure_dir,
+) -> List[
+    Rect
+]:  # pylint: disable=too-many-nested-blocks, too-many-branches  # local algorithm, easier to read when not split up
+    """Extract rects in PDF."""
+    LOG.info('Extracting rects ...')
+    rect_list = []
+
+    for idx_page, page in enumerate(  # pylint: disable=too-many-nested-blocks
+        tqdm(pdf.pages, desc='###### Extracting rects', unit='pages', bar_format=bar_format_lvl2()),
+    ):
+        if logging_needed(idx_page, len(pdf.pages)):
+            LOG.debug('Extracting rects page %s of %s', idx_page + 1, len(pdf.pages))
+        page_crop = pro.remove_page_header_footer(page)
+        lt_page = page._layout  # pylint: disable=protected-access  # easiest way to obtain LTPage
+
+        # check and filter figures
+        #figures = check_and_filter_figures(page_crop.objects['figure']) if 'figure' in page_crop.objects else []
+        #rects = page_crop.objects['rects'] if 'rects' in page_crop.objects else []
+        rects = page.objects['rect'] if 'rect' in page.objects else []
+
+
+        if len(rects) != 0:
+            for idx_rect, rect in enumerate(rects):
+                rect_pos = Position(
+                    float(rect['x0']),
+                    float(rect['y0']),
+                    float(rect['x1']),
+                    float(rect['y1']),
+                    pages_list[idx_page],
+                )
+
+                non_stroking_color = rect['non_stroking_color']
+                fill = rect['fill']
+
+                bbox = (rect_pos.x0, rect_pos.y0, rect_pos.x1, rect_pos.y1)
+
+                LOG.info(f"found rect at {bbox} at page {idx_page+1}: color {non_stroking_color}");
+
+                lt_textboxes = lt_page_crop(
+                    bbox,
+                    lt_page._objs,  # pylint: disable=protected-access # access needed
+                    LTText,
+                    contain_completely=True,
+                )
+
+                textboxes = []
+                links = []
+                for lt_textbox in lt_textboxes:
+                    if catalog['annos']:
+                        links.extend(extract_linked_chars(lt_textbox, lt_page.pageid))
+                    bbox = (lt_textbox.x0, lt_textbox.y0, lt_textbox.x1, lt_textbox.y1)
+
+                    hbox = lt_to_libpdf_hbox_converter(lt_textbox)
+
+                    textboxes.append(hbox)
+
+                rect_name = f'page_{page.page_number}_rect.{idx_rect + 1}.png'
+
+                # create figures directory if not exist
+                Path(figure_dir).mkdir(parents=True, exist_ok=True)
+
+                rect_path = os.path.abspath(os.path.join(figure_dir, rect_name))
+
+                #figure = Figure(idx_figure + 1, image_path, fig_pos, links, textboxes, 'None')
+                #figure_list.append(figure)
+                rect = Rect( idx_rect + 1, rect_pos, links, textboxes, non_stroking_color )
+                rect_list.append(rect)
+
+        else:
+            LOG.info(f"found no rects on page {idx_page+1}: {page_crop.objects.keys()}")
+
+
+    #return figure_list
+    return rect_list
 
 
 def extract_rects(
