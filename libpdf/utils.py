@@ -39,7 +39,6 @@ from libpdf.exceptions import TextContainsNewlineError
 from libpdf.log import logging_needed
 from libpdf.models.chapter import Chapter
 from libpdf.models.figure import Figure
-from libpdf.models.rect import Rect
 from libpdf.models.horizontal_box import Char, HorizontalBox, HorizontalLine, Word
 from libpdf.models.paragraph import Paragraph
 from libpdf.models.rect import Rect

@@ -7,7 +7,6 @@ from pdfplumber.pdf import PDF
 
 from libpdf.models.chapter import Chapter
 from libpdf.models.figure import Figure
-from libpdf.models.rect import Rect
 from libpdf.models.paragraph import Paragraph
 from libpdf.models.rect import Rect
 from libpdf.models.root import Root

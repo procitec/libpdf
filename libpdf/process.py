@@ -25,7 +25,6 @@ from libpdf.catalog import catalog
 from libpdf.models.chapter import Chapter
 from libpdf.models.element import Element
 from libpdf.models.figure import Figure
-from libpdf.models.rect import Rect
 from libpdf.models.link import Link
 from libpdf.models.model_base import ModelBase
 from libpdf.models.page import Page
