@@ -400,7 +400,7 @@ def get_explict_dest(pdf, dest_list):
     return [dest_page_num, dest_rect_x, dest_rect_y]
 
 
-def update_ann_info(annotation_page_map, ann_resolved, page, idx_page, pdf):  # pylint: disable=too-many-branches
+def update_ann_info(annotation_page_map, ann_resolved, page, idx_page, pdf) -> None:  # pylint: disable=too-many-branches
     """
     Fetch the name of annotation, annotation location on the page and destination of the link annotation.
 
@@ -436,6 +436,14 @@ def update_ann_info(annotation_page_map, ann_resolved, page, idx_page, pdf):  # 
         float(ann_resolved["Rect"][3]) + ANNO_Y_TOLERANCE,
         page.height,
     )
+
+    left, top, right, bottom = ann_bbox
+    if top > bottom:
+        LOG.info(f"invalid annotation bbox: {ann_resolved['Rect']}, {ann_bbox}")
+        return
+        # maybe continue with swapped bbox
+        # ann_bbox = [left, bottom, right, top]
+
     page_crop = page.within_bbox(ann_bbox)
     ann_text = page_crop.extract_text(x_tolerance=1, y_tolerance=4)
 
