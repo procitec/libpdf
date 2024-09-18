@@ -441,7 +441,9 @@ def update_ann_info(annotation_page_map, ann_resolved, page, idx_page, pdf) -> N
     if top > bottom:
         LOG.info(f"invalid annotation bbox: {ann_resolved['Rect']}, {ann_bbox}")
         return
-        # maybe continue with swapped bbox
+        # maybe continue with swapped bbox.
+        # If enabled it has also issues with the ANNO_ TOLERANCE.
+        # These must be set to 0 in these cases or readded
         # ann_bbox = [left, bottom, right, top]
 
     page_crop = page.within_bbox(ann_bbox)
