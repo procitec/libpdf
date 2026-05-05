@@ -150,8 +150,8 @@ def test_content_structure(load_full_features_pdf):
     assert root is not None
     assert root.content is not None
 
-    # 5 nested chapters and 9 content before first chapter
-    assert len(root.content) == 14
+    # 5 nested chapters and 9 content before first chapter + 1 rect
+    assert len(root.content) == 15
 
     # content before first chapter
     assert root.content[0].type == "paragraph"
@@ -160,26 +160,28 @@ def test_content_structure(load_full_features_pdf):
     assert root.content[7].type == "figure"
 
     # chapter Useful contains two sub-chapters
-    assert root.content[11].title == "Chapter Useful"
-    assert root.content[11].content[0].title == "Meaningful"
-    assert root.content[11].content[1].title == "Funny"
+    assert root.content[12].title == "Chapter Useful"
+    assert root.content[12].content[0].title == "Meaningful"
+    assert root.content[12].content[1].title == "Funny"
 
     # sub-chapter contains a list of paragraphs, tables and figures including header/footer
-    assert len(root.content[11].content[0].content) == 8
-    assert root.content[11].content[0].content[0].type == "paragraph"
+    assert len(root.content[12].content[0].content) == 8
+    assert root.content[12].content[0].content[0].type == "paragraph"
     assert (
-        root.content[11].content[0].content[7].textbox.text
+        root.content[12].content[0].content[7].textbox.text
         == "Release snyder cut of justice league!!!"
     )
 
     # check paragraph unique id
     assert root.content[0].uid == "paragraph.1"
-    assert root.content[10].content[1].uid == "chapter.1/paragraph.2"
+    assert root.content[10].title == "Disclaimer"
+    # chapter gets virt identifier cause not numbered
+    assert root.content[10].content[1].uid == "chapter.virt.1/paragraph.2"
     assert (
-        root.content[11].content[0].content[0].uid
+        root.content[12].content[0].content[0].uid
         == "chapter.2/chapter.2.1/paragraph.1"
     )
-    assert root.content[13].content[0].uid == "chapter.A/paragraph.1"
+    assert root.content[14].content[0].uid == "chapter.A/paragraph.1"
 
     # check paragraphs amounts
     assert len(objects.flattened.paragraphs) == 48

@@ -1,90 +1,114 @@
-[tool.poetry]
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
 name = "libpdf"
-version = "0.1.0-post1"
+version = "0.1.0-post2"
 description = "Extract structured data from PDFs."
+readme = "README.rst"
+requires-python = ">=3.8"
+license = "MIT"
 authors = [
-    "Marco Heinemann <marco.heinemann@useblocks.com>",
+    { name = "Marco Heinemann", email = "marco.heinemann@useblocks.com" },
 ]
 maintainers = [
-    "Jui-Wen Chen <jui-wen.chen@useblocks.com>",
-    "Haiyang Zhang <haiyang.zhang@useblocks.com>",
+    { name = "Jui-Wen Chen", email = "jui-wen.chen@useblocks.com" },
+    { name = "Haiyang Zhang", email = "haiyang.zhang@useblocks.com" },
 ]
-license = 'MIT'
-readme = 'README.rst'
-homepage = 'http://pypi.python.org/pypi/libpdf'
-repository = 'http://github.com/useblocks/libpdf'
-documentation = 'http://libpdf.readthedocs.io/en/latest'
 classifiers = [
-    'Development Status :: 3 - Alpha',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
-    'Topic :: Scientific/Engineering',
-    'Topic :: Scientific/Engineering :: Information Analysis',
-    'Topic :: Software Development',
-    'Topic :: Software Development :: Libraries',
-    'Topic :: Software Development :: Libraries :: Python Modules',
-    'Topic :: Text Processing',
-    'Topic :: Utilities',
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing",
+    "Topic :: Utilities",
 ]
-include = [
-    'deps/*'
+dependencies = [
+    "chardet",
+    "click",
+    "PyYAML",
+    "ruamel.yaml",
+
+    # dependencies needed by pdfminer.six and pdfplumber which are delivered as wheels in the deps folder
+    # the libs were patched and no upstream PR has been raised yet
+    "pycryptodome",
+    "sortedcontainers",
+    "pillow; python_version < '3.13'",
+    "pillow>=11; python_version >= '3.13'",
+    "unicodecsv",
+    "wand",
+    "pdfplumber",
+    "pdfminer-six",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-chardet = "^4"
-click = "^8"
-PyYAML = "^6"
-"ruamel.yaml" = "^0.17"
-
-# optional deps for progress bars
-tqdm = { version = "^4.50.0", optional = true }
-colorama = { version = "^0.4.4", optional = true }
-
-# dependencies needed by pdfminer.six and pdfplumber which are deliverd as wheels in the deps folder
-# the libs were patched and no upstream PR has been raised yet
-# see [tool.poetry.dev-dependencies] for the forked libraries
-pycryptodome = "^3.9.9"
-sortedcontainers = "^2.3.0"
-pillow = "~10.2.0"  # cannot go higher because of this bug https://github.com/jsvine/pdfplumber/discussions/637
-unicodecsv = "^0.14.1"
-wand = "^0.6.5"
-
-# optional deps for docs, needed to make RTD work with pyproject.toml
-# see https://github.com/readthedocs/readthedocs.org/issues/4912#issuecomment-664002569
-sphinx = { version = "*", optional = true }
-sphinx_rtd_theme = { version = "*", optional = true }
-sphinxcontrib-plantuml = { version = "*", optional = true }
-pdfplumber = "^0.11.0"
-pdfminer-six = "^20231228"
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 tqdm = ["tqdm"]
 colorama = ["colorama"]
-docs = ["sphinx", "sphinx_rtd_theme", "sphinxcontrib-plantuml"]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinxcontrib-plantuml",
+]
 
-[tool.poetry.dev-dependencies]
-# testing
-pytest = "^7"
-pytest-cov = "*"
-tox = "*"
-pytest-xdist = "*"  # parallelisation
+[project.urls]
+Homepage = "http://pypi.python.org/pypi/libpdf"
+Repository = "http://github.com/useblocks/libpdf"
+Documentation = "http://libpdf.readthedocs.io/en/latest"
 
-# linting, formatting
-ruff = "^0.2.0"
+[project.scripts]
+libpdf = "libpdf.core:main_cli"
 
-# docs
-sphinx = "*"
-sphinx_rtd_theme = "*"
-sphinxcontrib-plantuml = "*"
+[dependency-groups]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+]
+lint = [
+    "ruff",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinxcontrib-plantuml",
+]
+dev = [
+    { include-group = "test" },
+    { include-group = "lint" },
+    { include-group = "docs" },
+    "tox",
+]
+
+[tool.uv]
+package = true
+default-groups = ["dev"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/deps",
+    "/docs",
+    "/libpdf",
+    "/tests",
+    "/README.rst",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["libpdf"]
+artifacts = [
+    "deps/*",
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
@@ -109,14 +133,13 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
-    ".venv",
 ]
 
 # use Black's default
 line-length = 88
 
 # lint according to oldest supported version
-target-version = "py38"
+target-version = "py310"
 
 # try out unstable rules, fixes, and formatting
 # changes are reviewed anyway
@@ -125,25 +148,22 @@ preview = true
 [tool.ruff.lint]
 # concept: select all rules by default and ignore unwanted (maybe just per file)
 # this comes at a cost: new added rules are applied automatically, so a CI that
-# runs green today might fail tomorow in case ruff gets updated
-# (which brings more good than bad)
-# TODO ENABLE NEXT LINE
+# runs green today might fail tomorrow in case ruff gets updated
 select = ["ALL"]
-# select = [] # commented out (don't want to fix all issues with this PR)
 ignore = [
+    "ANN101", # missing-type-self - infer typing is simple for this library
     "COM812", # missing-trailing-comma - may conflict with Ruff formatter
+    "CPY001", # missing-copyright-notice - specified on project level
     "D107",   # undocumented-public-init - commonly the docstring provides no helpful information
     "D203",   # D203 and D211 are mutually exclusive: https://github.com/PyCQA/pydocstyle/issues/141
     "D212",   # D212 and D213 are mutually exclusive: https://stackoverflow.com/a/45990465
+    "FBT001", # boolean-type-hint-positional-argument - good message, but need a concept how to deal with this
     "FIX002", # line-contains-todo - TODOs are considered helpful
     "ISC001", # may conflict with Ruff formatter
     "TD003",  # missing-todo-link - no big processes for us
-    "ANN101", # missing-type-self - infer typing is simple for this library
-    "CPY001", # missing-copyright-notice - specified on project level
-    "FBT001", # boolean-type-hint-positional-argument - good message, but need a concept how to deal with this
 ]
 
-# Allow autofix for all enabled rules (when `--fix`) is provided.
+# Allow autofix for all enabled rules when `--fix` is provided.
 fixable = ["ALL"]
 unfixable = [
     "D400",   # ends-in-period - dangerous to use (ruff may confuse summary line and content)
@@ -160,7 +180,6 @@ mypy-init-return = true  # no init return type needed if at least one arg is ann
 max-complexity = 20
 
 [tool.ruff.lint.per-file-ignores]
-# "docs/conf.py" = ["E402"]
 "**/__init__.py" = [
     "D104",
 ] # Missing docstring in public package - not needed for inits
@@ -168,9 +187,59 @@ max-complexity = 20
     "S101", # Use of `assert` detected
 ]
 
-[tool.poetry.scripts]
-libpdf = 'libpdf.core:main_cli'
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+min_version = 4.0
+envlist = py{38,39,310,311,312,313}, docs, lint, format-check
+
+[testenv]
+deps = uv
+skip_install = true
+passenv = *
+py_folders = examples libpdf tests
+commands_pre =
+    uv pip install -e .[tqdm,colorama] --group test
+commands =
+    python -m pytest -n auto --tb=long {posargs}
+
+[testenv:py313]
+# Generate coverage report only for latest Python
+commands =
+    python -m pytest -n auto --tb=long --cov=libpdf --cov-fail-under=80 {posargs}
+
+[testenv:docs]
+basepython = python3.13
+commands_pre =
+    uv pip install -e .[docs] --group docs
+commands =
+    sphinx-build -W -b html docs docs/_build/html
+
+[testenv:lint]
+basepython = python3.13
+commands_pre =
+    uv pip install --group lint
+commands =
+    ruff format --check {[testenv]py_folders}
+    # The former ruff-lint.toml limited linting to the files below.
+    # Keep this list here so formatting and linting can still cover different scopes.
+    ruff check --output-format=concise libpdf/models/horizontal_box.py libpdf/utils.py tests/conftest.py
+
+[testenv:format-check]
+basepython = python3.13
+commands_pre =
+    uv pip install --group lint
+commands =
+    ruff format --check {[testenv]py_folders}
+
+[testenv:format]
+basepython = python3.13
+commands_pre =
+    uv pip install --group lint
+commands =
+    ruff format {[testenv]py_folders}
+    ruff check --fix --exit-zero --silent {[testenv]py_folders}
+"""
